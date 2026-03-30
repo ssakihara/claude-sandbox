@@ -1,0 +1,38 @@
+services:
+  claude:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+    volumes:
+      # プロジェクトルートをマウント
+      - .:/workspace
+
+      # node_modules は名前付きボリュームで除外（コンテナ内で自動生成）
+      - node_modules:/workspace/node_modules
+
+      # ホストの設定を読み取り専用で一時領域にマウント
+      - ~/.claude/CLAUDE.md:/tmp/claude-host/CLAUDE.md:ro
+      - ~/.claude/agents:/tmp/claude-host/agents:ro
+      - ~/.claude/rules:/tmp/claude-host/rules:ro
+      - ~/.claude/references:/tmp/claude-host/references:ro
+      - ~/.claude/scripts:/tmp/claude-host/scripts:ro
+      - ~/.claude/settings.json:/tmp/claude-host/settings.json:ro
+      - ~/.gitconfig:/tmp/claude-host/.gitconfig:ro
+      - ~/.gitconfig_company:/tmp/claude-host/.gitconfig_company:ro
+
+      # 永続ボリューム（認証情報・セッションを保持）
+      - claude-data:/home/node/.claude
+      - gh-config:/home/node/.config/gh
+
+    stdin_open: true
+    tty: true
+    working_dir: /workspace
+
+volumes:
+  node_modules:
+  claude-data:
+  gh-config:
